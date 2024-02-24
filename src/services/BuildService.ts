@@ -64,17 +64,11 @@ const findContractName = (file:any) => {
 
 const buildContractFromSource = async (project:any, id:string): Promise<BuildStatus> => {
 
-    const hasOnlyOneContract = project.files.filter((x:any) => x.name.endsWith(".cpp")).length === 1;
-    const hasEntryContracts = project.files.filter((x:any) => x.name.endsWith(".entry.cpp")).length > 0;
+    const rootFile = project.files.filter((x:any) => x.name === project.mainFile);
 
-    if(!hasOnlyOneContract && !hasEntryContracts){
-        return new BuildStatus(false, "Must have only one contract file in the root or an entry file (<name>.entry.cpp).");
+    if(!rootFile){
+        return new BuildStatus(false, "Must set a .cpp file as Root.");
     }
-
-    const buildableFiles = (() => {
-        if(hasEntryContracts) return project.files.filter((x:any) => x.name.endsWith(".entry.cpp"));
-        return project.files.filter((x:any) => x.name.endsWith(".cpp"));
-    })();
 
     let compiledFiles = [];
 
@@ -82,13 +76,14 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
     try { await execute(`rm tmp_projects/${id}/build/*`); } catch (error) {}
 
     let timeTaken = Date.now();
-    for(let file of buildableFiles){
-        const contractName = findContractName(file);
-        if(!contractName) return new BuildStatus(false, `No contract name found for: ${file.name}. You can try adding a comment to your cpp entry file with the contract name like this: '//contractName:<name>'`);
+    for(let file of rootFile){
+        const contractName = file.name;
+        if(!contractName) return new BuildStatus(false, `No contract name found for: ${file.name}.`);
 
         const fileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
+        const filePath = file.path !== "" ? file.path + "/" : "";
 
-        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/include -o tmp_projects/${id}/build/${fileName}.wasm tmp_projects/${id}/src/${file.name} --contract=${contractName} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
+        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/include -o tmp_projects/${id}/build/${fileName}.wasm tmp_projects/${id}/src/${filePath}${file.name} --contract=${contractName} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
         if(buildResult !== "") {
             if(!localPath) {
                 localPath = (await execute('pwd')) + `/tmp_projects/${id}`;
