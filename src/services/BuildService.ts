@@ -34,10 +34,16 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
     // Write every file and create directories if the file is in a subdirectory
     project.files.forEach((file:any) => {
         if(file.path !== ""){
-            try { fs.mkdirSync(`tmp_projects/${id}/src/${file.path}`, { recursive: true }); } catch (error) {}
+            let pathing = file.path.split("/");
+            let newPath = "";
+            for (let a = 0; a < pathing.length; a++){
+                newPath += '/' + pathing[a];
+                try { fs.mkdirSync(`tmp_projects/${id}/src${newPath}`, { recursive: true }); } catch (error) {}
+            }
         }
         fs.writeFileSync(`tmp_projects/${id}/src/${file.path}${file.name}`, file.content);
     });
+    console.log(`tmp_projects/${id}/src`);
 
     return buildContractFromSource(project, id);
 }
@@ -69,8 +75,6 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
     if(!rootFile){
         return new BuildStatus(false, "Must set a .cpp file as Root.");
     }
-
-    let compiledFiles = [];
 
     try { fs.mkdirSync(`tmp_projects/${id}/build`, { recursive: true }); } catch (error) {}
     try { await execute(`rm tmp_projects/${id}/build/*`); } catch (error) {}
