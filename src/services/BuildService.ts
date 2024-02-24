@@ -43,7 +43,6 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
         }
         fs.writeFileSync(`tmp_projects/${id}/src/${file.path}${file.name}`, file.content);
     });
-    console.log(`tmp_projects/${id}/src`);
 
     return buildContractFromSource(project, id);
 }
@@ -86,7 +85,7 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
         const fileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
 
-        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/include -o tmp_projects/${id}/build/${fileName}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${contractName} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
+        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${fileName}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${contractName} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
         if(buildResult !== "") {
             if(!localPath) {
                 localPath = (await execute('pwd')) + `/tmp_projects/${id}`;
