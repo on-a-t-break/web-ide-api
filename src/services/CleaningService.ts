@@ -7,7 +7,7 @@ export default class CleaningService {
 
         interval = setInterval(() => {
             CleaningService.clean();
-        }, 60 * 60 * 1000 * 24 * 60); // Every hour
+        }, 60 * 60 * 1000); // Every hour
 
         // Once on startup
         CleaningService.clean();
