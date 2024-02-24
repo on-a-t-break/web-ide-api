@@ -6,11 +6,11 @@ export default class CleaningService {
         clearInterval(interval);
 
         interval = setInterval(() => {
-            CleaningService.clean();
+            //CleaningService.clean();
         }, 60 * 60 * 1000); // Every hour
 
         // Once on startup
-        CleaningService.clean();
+        //CleaningService.clean();
     }
 
     public static clean(): void {
