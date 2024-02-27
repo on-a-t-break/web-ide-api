@@ -20,5 +20,5 @@ const wss = new WebSocket.Server({ server:httpServer});
 
 wss.on('connection', (ws: WebSocket) => sockets(ws));
 
-httpServer.listen(process.env.WS_PORT || 3001, () => logger.info(`WS LIVE: ${process.env.WS_PORT || 3001}`));
-server.listen(process.env.HTTP_PORT || 3000, () => logger.info(`HTTP LIVE: ${process.env.HTTP_PORT || 3000}`));
+httpServer.listen(process.env.WS_PORT || 4001, () => logger.info(`WS LIVE: ${process.env.WS_PORT || 4001}`));
+server.listen(process.env.HTTP_PORT || 4000, () => logger.info(`HTTP LIVE: ${process.env.HTTP_PORT || 4000}`));
