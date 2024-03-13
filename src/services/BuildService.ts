@@ -108,14 +108,17 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
 
     // remove any old zips
-    try { await execute(`rm tmp_projects/${id}/*.zip`); } catch (error) {}
+    try { await execute(`rm tmp_projects/${id}/*.zip`); } catch (error) {
+        console.error("Error removing old zip files:", error);
+    }
     try {
         const zipped = await execute(`cd tmp_projects/${id} && zip --junk-paths ${id}.zip -r ./build`);
+        console.log(zipped);
     } catch (error) {
         console.error("error zipping files", error);
     }
 
-    await rimraf(`tmp_projects/${id}/src`);
+    //await rimraf(`tmp_projects/${id}/src`);
 
     return new BuildStatus(true, id);
 }
