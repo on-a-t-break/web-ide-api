@@ -64,7 +64,7 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
         const rootFileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
 
-        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${rootFileName}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
+        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${project.name}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
         if(buildResult !== "") {
             if(!localPath) {
                 localPath = (await execute('pwd')) + `/tmp_projects/${id}`;
@@ -77,7 +77,7 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
         // export memory from wasm
         // something is not working with piping in the wat on my env, so using a temp file
-        const exportTmp = await execute(
+        /*const exportTmp = await execute(
             `wasm2wat tmp_projects/${id}/build/${rootFileName}.wasm | sed -e 's|(memory |(memory (export "memory") |' > tmp_projects/${id}/build/${rootFileName}.wat`
         ).then(x => true).catch(err => {
             console.error("Error exporting memory", err);
@@ -91,6 +91,7 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
             })
             try { await execute(`rm tmp_projects/${id}/build/${rootFileName}.wat`); } catch (error) {}
         }
+        */
 
     }
 
@@ -125,7 +126,7 @@ const downloadProject = async (id:string) => {
 
         // Write every file and create directories if the file is in a subdirectory
         project.files.forEach((file:any) => {
-            if(file.path !== "") try { fs.mkdirSync(`tmp_projects/${id}/src/${file.path}`, { recursive: true }); } catch (error) {}
+            if(file.path !== "" && file.isFolder === false) try { fs.mkdirSync(`tmp_projects/${id}/src/${file.path}`, { recursive: true }); } catch (error) {}
             fs.writeFileSync(`tmp_projects/${id}/src/${file.path}${file.name}`, file.content);
         });
 
