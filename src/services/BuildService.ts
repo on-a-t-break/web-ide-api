@@ -63,8 +63,10 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
     for(let file of rootFile){
 
         const rootFileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
+        let buildString:string = `cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${project.contract}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`;
+        console.log(buildString);
 
-        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${project.contract}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
+        let buildResult:string = await execute(buildString).catch(x => x) as string;
         if(buildResult !== "") {
             if(!localPath) {
                 localPath = (await execute('pwd')) + `/tmp_projects/${id}`;
