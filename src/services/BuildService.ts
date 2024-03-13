@@ -33,7 +33,7 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
 
     // Write every file and create directories if the file is in a subdirectory
     project.files.forEach((file:any) => {
-        if(file.path !== ""){
+        if(file.path !== "" && file.isFolder === false){
             let pathing = file.path.split("/");
             let newPath = "";
             for (let a = 0; a < pathing.length; a++){
