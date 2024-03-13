@@ -33,7 +33,7 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
 
     // Write every file and create directories if the file is in a subdirectory
     project.files.forEach((file:any) => {
-        if(file.path !== "" && file.isFolder === false){
+        if(file.path !== ""){
             let pathing = file.path.split("/");
             let newPath = "";
             for (let a = 0; a < pathing.length; a++){
@@ -130,7 +130,7 @@ const downloadProject = async (id:string) => {
 
         // Write every file and create directories if the file is in a subdirectory
         project.files.forEach((file:any) => {
-            if(file.path !== "" && file.isFolder === false) try { fs.mkdirSync(`tmp_projects/${id}/src/${file.path}`, { recursive: true }); } catch (error) {}
+            if(file.path !== "") try { fs.mkdirSync(`tmp_projects/${id}/src/${file.path}`, { recursive: true }); } catch (error) {}
             fs.writeFileSync(`tmp_projects/${id}/src/${file.path}${file.name}`, file.content);
         });
 
