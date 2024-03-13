@@ -51,7 +51,6 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
 const buildContractFromSource = async (project:any, id:string): Promise<BuildStatus> => {
 
     const rootFile = project.files.filter((x:any) => x.name === project.root);
-    console.log("building A");
 
     if(!rootFile){
         return new BuildStatus(false, "Must set a .cpp file as Root.");
@@ -62,12 +61,8 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
     let timeTaken = Date.now();
     for(let file of rootFile){
-        console.log("building B");
 
-        const rootFileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
         let buildString:string = `cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${project.contract}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`;
-        console.log(buildString);
-
         let buildResult:string = await execute(buildString).catch(x => x) as string;
         if(buildResult !== "") {
             if(!localPath) {
@@ -108,12 +103,10 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
 
     // remove any old zips
-    try { await execute(`rm tmp_projects/${id}/*.zip`); } catch (error) {
-        console.error("Error removing old zip files:", error);
-    }
+    try { await execute(`rm tmp_projects/${id}/*.zip`); } catch (error) {}
     try {
         const zipped = await execute(`cd tmp_projects/${id} && zip --junk-paths ${id}.zip -r ./build`);
-        console.log(zipped);
+
     } catch (error) {
         console.error("error zipping files", error);
     }
