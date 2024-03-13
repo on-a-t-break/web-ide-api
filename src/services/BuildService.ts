@@ -48,28 +48,9 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
 }
 
 
-const findContractName = (file:any) => {
-    try {
-        if(file.content.includes('//contractName:')){
-            return file.content.split("//contractName:")[1].split("\n")[0].trim();
-        }
-        else if(file.content.includes('CONTRACT')){
-            return file.content.split("CONTRACT")[1].split(":")[0].trim()
-        }
-        else if(file.content.includes('[[eosio::contract')) {
-            return file.content.split(`[[eosio::contract("`)[1].split(`")]]`)[0].trim();
-        }
-    } catch (error) {
-        console.error("Error splitting file", error, file.name);
-        return null;
-    }
-
-    return null;
-}
-
 const buildContractFromSource = async (project:any, id:string): Promise<BuildStatus> => {
 
-    const rootFile = project.files.filter((x:any) => x.name === project.mainFile);
+    const rootFile = project.files.filter((x:any) => x.name === project.root);
 
     if(!rootFile){
         return new BuildStatus(false, "Must set a .cpp file as Root.");
@@ -81,9 +62,9 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
     let timeTaken = Date.now();
     for(let file of rootFile){
 
-        const fileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
+        const rootFileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
 
-        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${fileName}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${fileName} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
+        let buildResult:string = await execute(`cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${rootFileName}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`).catch(x => x) as string;
         if(buildResult !== "") {
             if(!localPath) {
                 localPath = (await execute('pwd')) + `/tmp_projects/${id}`;
@@ -97,18 +78,18 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
         // export memory from wasm
         // something is not working with piping in the wat on my env, so using a temp file
         const exportTmp = await execute(
-            `wasm2wat tmp_projects/${id}/build/${fileName}.wasm | sed -e 's|(memory |(memory (export "memory") |' > tmp_projects/${id}/build/${fileName}.wat`
+            `wasm2wat tmp_projects/${id}/build/${rootFileName}.wasm | sed -e 's|(memory |(memory (export "memory") |' > tmp_projects/${id}/build/${rootFileName}.wat`
         ).then(x => true).catch(err => {
             console.error("Error exporting memory", err);
             return false;
         })
         if(exportTmp) {
             await execute(
-                `wat2wasm -o tmp_projects/${id}/build/${fileName}.wasm tmp_projects/${id}/build/${fileName}.wat`
+                `wat2wasm -o tmp_projects/${id}/build/${rootFileName}.wasm tmp_projects/${id}/build/${rootFileName}.wat`
             ).catch(err => {
                 console.error("Error exporting memory 2", err);
             })
-            try { await execute(`rm tmp_projects/${id}/build/${fileName}.wat`); } catch (error) {}
+            try { await execute(`rm tmp_projects/${id}/build/${rootFileName}.wat`); } catch (error) {}
         }
 
     }
