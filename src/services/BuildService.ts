@@ -51,6 +51,7 @@ const buildContractFromProject = async (project:any, id:string|null = null): Pro
 const buildContractFromSource = async (project:any, id:string): Promise<BuildStatus> => {
 
     const rootFile = project.files.filter((x:any) => x.name === project.root);
+    console.log("building A");
 
     if(!rootFile){
         return new BuildStatus(false, "Must set a .cpp file as Root.");
@@ -61,6 +62,7 @@ const buildContractFromSource = async (project:any, id:string): Promise<BuildSta
 
     let timeTaken = Date.now();
     for(let file of rootFile){
+        console.log("building B");
 
         const rootFileName = file.name.replace(".entry.cpp", "").replace(".cpp", "");
         let buildString:string = `cdt-cpp -I tmp_projects/${id}/src/${project.name}/include -o tmp_projects/${id}/build/${project.contract}.wasm tmp_projects/${id}/src/${file.path}${file.name} --contract=${project.contract} --abigen --no-missing-ricardian-clause`;
